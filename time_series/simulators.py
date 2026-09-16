@@ -192,7 +192,7 @@ def fit_merton_mle(returns: np.ndarray, dt: float = 1/252, max_jumps: int = 10) 
         mu, sigma, lam, mu_J, sigma_J = params
         
         # Enforce strict positive variance and jump intensity
-        if sigma <= 1e-6 or lam < 1e-6 or sigma_J <= 1e-6:
+        if sigma <= 1e-4 or lam < 1e-4 or sigma_J <= 1e-4:
             return 1e10
             
         k = np.exp(mu_J + 0.5 * sigma_J**2) - 1.0
@@ -223,17 +223,17 @@ def fit_merton_mle(returns: np.ndarray, dt: float = 1/252, max_jumps: int = 10) 
     init_params = np.array([
         sample_mean / dt,                # Annualized drift mu
         sample_std * 0.7 / np.sqrt(dt),  # Continuous diffusion vol sigma
-        5.0,                             # Jump intensity lambda (5 jumps/year)
-        -0.02,                           # Mean jump size mu_J (-2%)
-        sample_std * 1.5                 # Jump volatility sigma_J
+        2.0,                             # Jump intensity lambda (w jumps/year)
+        -0.03,                           # Mean jump size mu_J (-3%)
+        sample_std * 2.5                 # Jump volatility sigma_J
     ])
     
     bounds = [
-        (-2.0, 2.0),       # mu
-        (1e-4, 2.0),       # sigma
-        (1e-3, 50.0),      # lam
-        (-0.5, 0.5),       # mu_J
-        (1e-4, 1.0)        # sigma_J
+        (-1.0, 1.0),       # mu
+        (1e-2, 0.6),       # sigma
+        (1e-1, 15.0),      # lam
+        (-0.2, 0.1),       # mu_J
+        (sample_std*1.5, 0.3)        # sigma_J
     ]
     
     result = minimize(neg_log_likelihood, init_params, method='L-BFGS-B', bounds=bounds)
